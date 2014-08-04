@@ -1,0 +1,73 @@
+<html>
+  <body>
+    Open the dev tools (ctrl+shift+j) to see what's going on. You might need to refresh the page.
+    <hr/>
+    <ul id="webcomponents"></ul>
+    <hr/>
+    <div id="output"></div>
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      var componentListUrl = "https://gist.githubusercontent.com/coreybutler/df94b6a9d15f1e869d54/raw/f68277d009c4b9d0ad31fabed2959f76b241eaaa/components.json";
+      var wc; // This is a placeholder where we'll store web component data.
+      
+      // Retrieve the list of components we need to show
+      console.log('Get the component list from '+componentListUrl);
+      $.ajax({
+        url: componentListUrl,
+        method: "GET"
+      }).done(function(data){
+        console.log('AJAX request complete. Data Below:');
+        console.dir(data);
+        
+        // Store the data for later so we don't have to submit another API request
+        wc = data;
+        
+        /**
+         * The data should be returned as a JSON object, looking something like:
+         * {
+         *   "myComponent": "url",
+         *   "myComponent2": "url2"
+         *   ...
+         * }
+         *
+         * This is a "key/value" structure... i.e. there is a "key": "value". The value
+         * could be a nested object, but the structure of this object is simple.
+         *
+         * JavaScript can loop through each key of an object with a for->in loop
+         */
+        for (var component in data) {
+          // "component" will be the key. You can reference the value by specifying the key, i.e.
+          // data[component]. This is the same as saying data.myComponent or data.myComponent2,
+          // but we need to evaluate the value dynamically... thus the data[<variable>] syntax
+          console.log(component+" component data available at "+data[component]);
+          
+          // Let's add the component to our list with jQuery
+          $('#webcomponents').append('<li><a href="" id="'+component+'">'+component+'</a></li>');
+
+        }
+        
+        // Once we've create our list of components, let's add event listeners for when they're clicked.
+        $('#webcomponents > li > a').click(function(event){
+          event.preventDefault(); // This line prevents the normal click action (which would try to link to another page)
+          
+          console.log('You clicked on a web component!');
+          
+          // Identify the web component
+          var component = event.target.id;
+          console.log('Component:',component);
+          
+          // Let's pull the data for the component we clicked on.
+          $.ajax({
+            url: wc[component],
+            method: 'GET'
+          }).done(function(data){
+            console.log('Retrieved the data for '+component);
+            console.dir(data);
+            // This is where you'd normally process the data, i.e. update your DOM/HTML.
+            $('#output').append("<pre>"+JSON.stringify(data,null,2)+"</pre>");
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
