@@ -29,3 +29,4 @@ components
 
 # Allow the .bowercc file
 !.bowercc
+!.fenix.json
